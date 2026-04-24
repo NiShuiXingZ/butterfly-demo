@@ -1,0 +1,30 @@
+[
+  {
+    "filename": "data.js",
+    "code": "import Node from './node.js';\r\n\r\nlet num = 200;\r\n\r\nfunction genNode() {\r\n  let nodes = [];\r\n  for (let i = 0; i < num; i++) {\r\n    nodes.push({\r\n      id: i.toString(),\r\n      index: i.toString(),\r\n      Class: Node\r\n    });\r\n  }\r\n  return nodes;\r\n}\r\n\r\nfunction genEdge() {\r\n  let edges = [];\r\n  let index = 0;\r\n  let count = 0;\r\n  for (let i = 0; i < num; i++, count++) {\r\n    if (count > 2 * index + 1) {\r\n      index++;\r\n      count = 0;\r\n    }\r\n    edges.push({\r\n      // source: index.toString(),\r\n      source: '1',\r\n      target: i.toString()\r\n    });\r\n  }\r\n  // 把自我循环那个东西去掉\r\n  edges.shift();\r\n  return edges;\r\n}\r\n\r\nexport default {\r\n  nodes: genNode(),\r\n  edges: genEdge()\r\n};\r\n"
+  },
+  {
+    "filename": "index.jsx",
+    "code": "import React, {Component} from 'react';\r\nimport ReactDOM from 'react-dom';\r\nimport {Canvas} from 'butterfly-dag';\r\nimport mockData from './data';\r\n\r\nimport 'butterfly-dag/dist/index.css';\r\nimport './index.less';\r\n\r\nclass ForceTree extends Component {\r\n  componentDidMount() {\r\n    let root = document.getElementById('dag-canvas');\r\n    this.canvas = new Canvas({\r\n      root: root,\r\n      disLinkable: true, // 可删除连线\r\n      linkable: false,    // 可连线\r\n      draggable: true,   // 可拖动\r\n      zoomable: true,    // 可放大\r\n      moveable: true,    // 可平移\r\n      layout: {\r\n        type: 'forceLayout',\r\n        options: {\r\n          link: {\r\n            // 线条的距离\r\n            distance: 50,\r\n            // 线条的粗细\r\n            strength: 1\r\n          },\r\n        },\r\n      },\r\n      theme: {\r\n        edge: {\r\n          shapeType: 'Straight'\r\n        }\r\n      }\r\n    });\r\n    this.canvas.draw(mockData);\r\n  }\r\n  render() {\r\n    return (\r\n      <div className='force-tree-page'>\r\n        <div className=\"force-tree-canvas\" id=\"dag-canvas\">\r\n        </div>\r\n      </div>\r\n    );\r\n  }\r\n}\r\n\r\nReactDOM.render(<ForceTree />, document.getElementById('root'));\r\n"
+  },
+  {
+    "filename": "index.less",
+    "code": "@import 'theme.less'; \n.force-tree-page {\r\n  position: relative;\r\n  height: 100%;\r\n  width: 100%;\r\n  .force-tree-canvas{\r\n    height: 100%;\r\n    width: 100%;\r\n  }\r\n}"
+  },
+  {
+    "filename": "node.js",
+    "code": "import {Node} from 'butterfly-dag';\r\nimport $ from 'jquery';\r\n\r\nimport './node.less';\r\n\r\nclass BaseNode extends Node {\r\n  constructor(opts) {\r\n    super(opts);\r\n    this.id = opts.id;\r\n    this.top = opts.top;\r\n    this.left = opts.left;\r\n    this.options = opts;\r\n  }\r\n  draw = (opts) => {\r\n    let container = $('<div class=\"force-node\"></div>')\r\n      .css('top', opts.top + 'px')\r\n      .css('left', opts.left + 'px')\r\n      .attr('id', opts.id);\r\n\r\n    container.text(opts.options.index);\r\n\r\n    return container[0];\r\n  }\r\n}\r\n\r\nexport default BaseNode;\r\n"
+  },
+  {
+    "filename": "node.less",
+    "code": "@import 'theme.less'; \n.force-node {\r\n  position: absolute;\r\n  width: 30px;\r\n  height: 30px;\r\n  line-height: 30px;\r\n  text-align: center;\r\n  border-radius: 50%;\r\n  border: @butterfly-box-border;\r\n  color: @butterfly-overlay-font-color;\r\n  background-color: @butterfly-primary-color;\r\n}"
+  },
+  {
+    "filename": "package.json",
+    "code": "{\r\n  \"name\": \"force\",\r\n  \"cn_name\": \"forceLayout布局\",\r\n  \"description\": \"a dag to display forceLayout\",\r\n  \"cn_description\": \"用于展示forceLayout布局的DAG图\",\r\n  \"dependencies\": {\r\n    \"butterfly-dag\": \"*\",\r\n    \"react\": \"^16.0.0\",\r\n    \"react-dom\": \"^16.0.0\",\r\n    \"jquery\": \"*\",\r\n    \"lodash\": \"*\"\r\n  }\r\n}"
+  },
+  {
+    "filename": "theme.less",
+    "code": "@butterfly-theme-color-base:#fff;\r\n@butterfly-normal-font-color-base:#222;;\r\n@butterfly-overlay-font-color-base:#FFF;\r\n@butterfly-primary-color-base:#F66902;\r\n@butterfly-box-border-color-base: #D9D9D9;\r\n@butterfly-box-shadow-base:0 2px 3px 0 rgba(0,112,204,0.06);\r\n@butterfly-box-radius-base:100px;\r\n@butterfly-line-color-base: #BFBFBF;\r\n// 主题背景色（画布背景色）\r\n@butterfly-theme-background-color: @butterfly-theme-color-base;\r\n// （各图形框）普通情况背景色\r\n@butterfly-theme-color: fade(@butterfly-theme-color-base,80%);\r\n// 主题色\r\n@butterfly-primary-color: @butterfly-primary-color-base;\r\n// 普通情况下字体颜色\r\n@butterfly-normal-font-color: @butterfly-normal-font-color-base;\r\n// 主题背景色上的字体颜色及icon颜色\r\n@butterfly-overlay-font-color: @butterfly-overlay-font-color-base;\r\n// 拖动时的背景色\r\n@butterfly-box-move-background-color: fade(@butterfly-primary-color, 20%);\r\n// 边框的样式\r\n@butterfly-box-border: 1px solid @butterfly-box-border-color-base;\r\n@butterfly-box-shadow: @butterfly-box-shadow-base;\r\n@butterfly-box-radius: @butterfly-box-radius-base;\r\n@butterfly-box-node-border-hover: 1px solid @butterfly-primary-color;\r\n// 线条样式\r\n@butterfly-line-color: @butterfly-line-color-base;"
+  }
+]
